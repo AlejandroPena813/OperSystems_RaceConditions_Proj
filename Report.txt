@@ -1,0 +1,74 @@
+Alejandro Pena Caicedo
+ufid:3712-3113
+COP4600
+Exercise 3
+
+Part 3:
+
+In my report below, i fully describe the test scenarios of spawn on increment, followed by running the program consecutive
+on the changed/incremented foo.txt. After running a variety of cases and testing large amounts of forks of increment, i was unable
+to produce race conditions since all cases(with the right memory for consecutive) produced no non-consecutive lines from my program consecutive
+and thus i was unable to pinpoint the critical section. My understanding of race conditions is that they occur when multiple threads
+are allowed access to a shared data source, and both are trying to manipulate the same data. Since you can't exactly
+know when the threads are gonna access the shared data,the results of the data change depend on the scheduling of the threads
+which means they end up "racing" to manipulate/access the data and therefore can produce undefined results. These problems typically
+occur when the considered threads check a certain value and then act a certain way based off the check, as done in "if statements" in C.
+
+My guess on when a race condition would arise in exercise 3 is when you are spawning a large amount of children to execute increment by large values.
+I would also assume that the critical section is somewhere in my spawn program within the fork function since so many fork's are being
+called upon at such a high rate, but an even better guess would be that it is within the increment program since that is where the increment is happening
+and it is the program that is adding to foo.txt, and when the "consecutive program" is called it is checking for errors produced by increment on foo.txt.
+
+
+Report:
+In exercise 3, I ran many cases in search of finding a race condition which will occur within the
+critical region. The first case of exercise 3 was simple since i was only testing the first program i
+created, consecutive.c, on the example that the Professor provided in the specifications which was:
+1
+2
+3
+4
+5
+5
+16
+17
+which led to the proper output:
+5: 5
+6: 5
+6: 5
+7: 16
+since those were two pairs of non-consecutive lines.
+
+I then created my spawn program, and after ensuring that it worked properly in that it forked the number of children
+specified in the command line, and each child ran increment on foo.txt, x amount of times, x being the value
+specified within the quotations between increment and foo.txt.
+
+-The first case i ran was ./spawn 1 "./increment 10 foo.txt". This created a single child, which executed increment 10
+on foo.txt, which as specified in part 3, foo.txt only had one line with the value of 1 in it. after running spawn,
+foo.txt had the numbers from 1-11, one value per line, in a consecutive manner. Consecutive ran and printed nothing out,
+since each line was consecutive with respect to the next.
+- I then ran multiple spawn cases and came across the last scenario where spawn and increment still functioned properly.
+The case was ./spawn 7 "./increment 10 foo.txt", where 7 children were forked to run increment 10 on foo.txt. As expected,
+foo.txt had 71 lines, with one value per line consecutively from 1 to 71. And consecutive ran and once again printed nothing
+since each line was one value less than the next.
+
+*spawn 7 case was the last one to not produce the message "PM: warning, process table is full!", followed by
+"Cannot fork: resource temporarily unavailable".
+
+- The first strange case arose from when i ran spawn ./spawn 8 "./increment 10 foo.txt". After running the command, i opened foo.txt
+and noticed that instead of having 81 lines that were consecutive from 1 to 81, i instead had made 217 consecutive lines of
+values from 1-217 on each line. Finally, i had a dynamic array with a base size of 100(although it could expand further) for my
+consecutive program and unfortunately the program produced an error due to memory allocation.
+-I then decided to increase the base memory of my dynamic array in my consecutive program from 100 to 10,000. I then ran ./spawn 15 "./increment 10 foo.txt",
+this produced 1,638 lines of consecutive numbers, i then ran my consecutive program and no non-consecutive line and number pairs were printed.
+-Finally, i ran ./spawn 20 "./increment 10 foo.txt" and the spawn program seemed to go on running for a long time and seemed to not
+be terminating any time soon, so i typed in ctrl c to terminate the program and i am sure foo.txt had recorded all if not most of the values
+from running spawn 20, but since i had to end a seemingly endless spawn execution i may not have recorded al the values.
+I ran the consecutive program, but since the base memory of my dynamic array was only of size 10,000 it could not expand its memory fast enough
+to test all the 12k+ consecutive integers. Therefore, i decided to increase the base memory of the dynamic array of consecutive from
+10,000 to 15,000 to properly test the 12k+ lines of foo.txt, and the consecutive program concluded that there were no race conditions and all
+12 thousand integers were properly consecutive with respect to one another.
+
+After running the final spawn case, i concluded that i would likely run out of memory before coming across a race condition since
+my spawn program running forks on increment produced large random amounts of consecutive line values faster than my consecutive program
+could allocate enough memory for its dynamic array to see if foo.txt had the correct ordering of the line integers.
